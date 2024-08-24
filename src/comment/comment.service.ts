@@ -13,7 +13,7 @@ export class CommentService {
     try {
       return await this.commentRepository.find({
         where: query,
-        include: { profile: true, roles: true, refreshTokens: true },
+        include: { author: true },
       });
     } catch (error) {
       handleError(error);
@@ -37,27 +37,23 @@ export class CommentService {
     }
   }
   async create(createCommentData: CreateCommentDto): Promise<Comment> {
-    const { commentId } = createCommentData;
+    // const { commentId } = createCommentData;
 
     try {
-      const existingComment = await this.commentRepository.exists({
-        where: { commentId },
-      });
+      // const existingComment = await this.commentRepository.exists({
+      //   where: { commentId },
+      // });
 
-      if (existingComment) {
-        throw new HttpException(
-          'Comment with credentials already exists.',
-          HttpStatus.CONFLICT,
-        );
-      }
+      // if (existingComment) {
+      //   throw new HttpException(
+      //     'Comment with credentials already exists.',
+      //     HttpStatus.CONFLICT,
+      //   );
+      // }
 
       const commentData = {
-        title: '',
-        body: '',
-        description: '',
-        tags: '',
-        image: '',
-        status: CommentStatus.ACTIVE,
+        ...createCommentData,
+        status: CommentStatus.PUBLISHED,
       };
 
       const newComment = await this.commentRepository.create({
@@ -71,26 +67,24 @@ export class CommentService {
     }
   }
 
-  async update(updateCommentData: UpdateCommentDto) {
-    const { id, ...data } = updateCommentData;
-
+  async update(id: string, updateCommentData: UpdateCommentDto) {
     try {
       return await this.commentRepository.update({
         where: { id },
-        data,
+        data: updateCommentData,
       });
     } catch (error) {
       handleError(error);
     }
   }
 
-  async upsert(updateCommentData: UpdateCommentDto) {
+  async upsert(id: string, updateCommentData: UpdateCommentDto) {
     Logger.debug(updateCommentData);
 
     try {
       return await this.commentRepository.upsert({
-        where: { id: updateCommentData.id },
-        data: updateCommentData.data,
+        where: { id },
+        data: updateCommentData,
       });
     } catch (error) {
       handleError(error);

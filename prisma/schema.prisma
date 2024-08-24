@@ -44,8 +44,6 @@ model Post {
   body        String       @db.Text
   status      PostStatus   @default(PUBLISHED)
   comments    Comment[]
-  readCount   BigInt
-  readingTime String
   author      Autobot      @relation(fields: [authorId], references: [id])
   authorId    String       @unique
   createdAt   DateTime     @default(now())
@@ -54,8 +52,8 @@ model Post {
 
 model Comment {
   id         String        @id @default(uuid())
-  email      String
-  name       String
+  // email      String
+  // name       String
   comment    String
   status     CommentStatus @default(PUBLISHED)
   parent     Comment       @relation("commentToComment", fields: [parentId], references: [id])

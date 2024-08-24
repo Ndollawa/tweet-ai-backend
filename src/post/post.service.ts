@@ -13,7 +13,7 @@ export class PostService {
     try {
       return await this.postRepository.find({
         where: query,
-        include: { autobot: true },
+        include: { author: true },
       });
     } catch (error) {
       handleError(error);
@@ -37,11 +37,11 @@ export class PostService {
     }
   }
   async create(createPostData: CreatePostDto): Promise<Post> {
-    const { userId } = createPostData;
+    const { title } = createPostData;
 
     try {
       const existingPost = await this.postRepository.exists({
-        where: { userId },
+        where: { title },
       });
 
       if (existingPost) {
@@ -52,12 +52,8 @@ export class PostService {
       }
 
       const postData = {
-        title: '',
-        body: '',
-        description: '',
-        tags: '',
-        image: '',
-        status: PostStatus.ACTIVE,
+        ...createPostData,
+        status: PostStatus.PUBLISHED,
       };
 
       const newPost = await this.postRepository.create({
@@ -71,26 +67,22 @@ export class PostService {
     }
   }
 
-  async update(updatePostData: UpdatePostDto) {
-    const { id, ...data } = updatePostData;
-
+  async update(id: string, updatePostData: UpdatePostDto) {
     try {
       return await this.postRepository.update({
         where: { id },
-        data,
+        data: updatePostData,
       });
     } catch (error) {
       handleError(error);
     }
   }
 
-  async upsert(updatePostData: UpdatePostDto) {
-    Logger.debug(updatePostData);
-
+  async upsert(id: string, updatePostData: UpdatePostDto) {
     try {
       return await this.postRepository.upsert({
-        where: { id: updatePostData.id },
-        data: updatePostData.data,
+        where: { id },
+        data: updatePostData,
       });
     } catch (error) {
       handleError(error);

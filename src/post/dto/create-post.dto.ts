@@ -6,7 +6,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { CommentDto } from './comment.dto';
+import { CreateCommentDto } from '../../comment/dto/create-comment.dto';
 
 export class CreatePostDto {
   @IsString()
@@ -16,30 +16,14 @@ export class CreatePostDto {
   @IsString()
   @IsNotEmpty()
   body: string;
- 
+
   @IsString()
   @IsNotEmpty()
-  author: string;
+  authorId: string;
 
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => CommentDto)
+  @Type(() => CreateCommentDto)
   @IsOptional()
-  comments?: CommentDto[];
-}
-
-export class UpdatePostDto {
-  @IsString()
-  @IsOptional()
-  title?: string;
-
-  @IsString()
-  @IsOptional()
-  body?: string;
-
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => CommentDto)
-  @IsOptional()
-  comments?: CommentDto[];
+  comments?: CreateCommentDto[];
 }

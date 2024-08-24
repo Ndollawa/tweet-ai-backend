@@ -33,7 +33,7 @@ async function bootstrap() {
   const devPort = app.get(ConfigService).get('DEVELOPMENT_PORT');
   const port = process.env.PORT || devPort;
   app.enableCors({
-    origin: ['http://localhost:3000'],
+    origin: ['http://localhost:5173'],
     credentials: true,
   });
   app.setGlobalPrefix('api/v1');

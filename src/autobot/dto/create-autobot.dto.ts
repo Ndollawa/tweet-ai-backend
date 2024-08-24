@@ -6,7 +6,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { PostDto } from './post.dto';
+import { CreatePostDto } from '../../post/dto/create-post.dto';
 
 export class CreateAutobotDto {
   @IsString()
@@ -15,19 +15,7 @@ export class CreateAutobotDto {
 
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => PostDto)
+  @Type(() => CreatePostDto)
   @IsOptional()
-  posts?: PostDto[];
-}
-
-export class UpdateAutobotDto {
-  @IsString()
-  @IsOptional()
-  name?: string;
-
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => PostDto)
-  @IsOptional()
-  posts?: PostDto[];
+  posts?: CreatePostDto[];
 }

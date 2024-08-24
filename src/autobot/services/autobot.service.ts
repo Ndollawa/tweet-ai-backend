@@ -22,7 +22,7 @@ export class AutobotService {
     try {
       return await this.autobotRepository.find({
         where: query,
-        include: { author: true},
+        // include: { posts: true},
       });
     } catch (error) {
       handleError(error);
@@ -46,51 +46,77 @@ export class AutobotService {
     }
   }
   async generateAutobots() {
-    const autobots = [];
+    let autobotsCount;
     for (let i = 0; i < 500; i++) {
-      const { data: user } = await axios.get('https://jsonplaceholder.typicode.com/users/1');
-      const autobot =  await this.autobotRepository.create({ name: user.name });
+      // Fetch user data
+      const { data: user } = await axios.get(
+        `https://jsonplaceholder.typicode.com/users/${i}`,
+      );
 
+      // Create a new Autobot using Prisma
+      const autobot = await this.autobotRepository.create({
+        data: {
+          name: user.name,
+        },
+      });
+
+      // Create 10 posts for each Autobot
       for (let j = 0; j < 10; j++) {
-        const { data: post } = await axios.get('https://jsonplaceholder.typicode.com/posts/1');
-        const newPost = await this.postService.create({ title: `${post.title}-${i}-${j}`, body:post.body, author:autobot.id });
+        const { data: post } = await axios.get(
+          `https://jsonplaceholder.typicode.com/posts/${j}`,
+        );
 
+        // Create a new Post associated with the Autobot
+        const newPost = await this.postService.create({
+          title: `${post.title}-${i}-${j}`,
+          body: post.body,
+          authorId: autobot.id,
+        });
+
+        // Create 10 comments for each post
         for (let k = 0; k < 10; k++) {
-          const { data: comment } = await axios.get('https://jsonplaceholder.typicode.com/comments/1');
-          const newComment = await this.commentService.create({ body: comment.body, post: newPost });
+          const { data: comment } = await axios.get(
+            `https://jsonplaceholder.typicode.com/comments/${k}`,
+          );
+
+          // Create a new Comment associated with the Post
+          await this.commentService.create({
+            title: comment.name,
+            comment: comment.body,
+            postId: newPost.id,
+            authorId: comment.name,
+            parentId: '',
+          });
         }
       }
-      autobots.push(autobot);
-        // Your logic to increment the Autobot count
-        const newCount = /* logic to calculate new count */;
-        
-        // Emit the new count to all clients
-        this.autobotGateway.updateAutobotCount(newCount);
-      
+
+      const newCount = await this.autobotRepository.count({});
+
+      // Emit the new count to all connected clients
+      autobotsCount = await this.autobotGateway.updateAutobotCount(newCount);
     }
-    return autobots;
+    return autobotsCount;
   }
-  async update(id:string, updateAutobotData: UpdateAutobotDto) {
-   
-       try {
-         return await this.autobotRepository.update({
-           where: { id },
-            data: updateAutobotData,
-         });
-       } catch (error) {
-         handleError(error);
-       }
-     }
-   
-     async upsert(id:string, updateAutobotData: UpdateAutobotDto) {
-   
-       try {
-         return await this.autobotRepository.upsert({
-           where: { id },
-           data: updateAutobotData,
-         });
-       } catch (error) {
-         handleError(error);
-       }
-     }
+
+  async update(id: string, updateAutobotData: UpdateAutobotDto) {
+    try {
+      return await this.autobotRepository.update({
+        where: { id },
+        data: updateAutobotData,
+      });
+    } catch (error) {
+      handleError(error);
+    }
+  }
+
+  async upsert(id: string, updateAutobotData: UpdateAutobotDto) {
+    try {
+      return await this.autobotRepository.upsert({
+        where: { id },
+        data: updateAutobotData,
+      });
+    } catch (error) {
+      handleError(error);
+    }
+  }
 }
