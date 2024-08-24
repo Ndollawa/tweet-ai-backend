@@ -9,10 +9,10 @@ import { PostRepository } from './post.repository';
 export class PostService {
   constructor(protected readonly postRepository: PostRepository) {}
 
-  async find(query: any): Promise<Post> {
+  async find(id: any): Promise<Post> {
     try {
       return await this.postRepository.find({
-        where: query,
+        where: { id },
         include: { author: true },
       });
     } catch (error) {

@@ -18,11 +18,17 @@ export class AutobotService {
     protected readonly postService: PostService,
   ) {}
 
-  async find(query: any): Promise<Autobot> {
+  async find(id: string): Promise<Autobot> {
     try {
       return await this.autobotRepository.find({
-        where: query,
-        // include: { posts: true},
+        where: { id },
+        include: {
+          posts: {
+            include: {
+              comments: true,
+            },
+          },
+        },
       });
     } catch (error) {
       handleError(error);
@@ -31,7 +37,9 @@ export class AutobotService {
 
   async findAll(query: any): Promise<Autobot[]> {
     try {
-      return await this.autobotRepository.findMany(query);
+      const autobotCounts = await this.autobotRepository.findMany(query);
+      await this.autobotGateway.updateAutobotCount(autobotCounts.length);
+      return autobotCounts;
     } catch (error) {
       handleError(error);
     }
@@ -46,29 +54,23 @@ export class AutobotService {
     }
   }
   async generateAutobots() {
-    let autobotsCount;
-    for (let i = 0; i < 500; i++) {
-      // Fetch user data
-      const { data: user } = await axios.get(
-        `https://jsonplaceholder.typicode.com/users/${i}`,
-      );
-
-      // Create a new Autobot using Prisma
+    const autobots = [];
+    for (let i = 1; i <= 500; i++) {
+   
       const autobot = await this.autobotRepository.create({
         data: {
-          name: user.name,
+          name: `Bot ${Date.now().toString()}`,
         },
       });
-
       // Create 10 posts for each Autobot
       for (let j = 0; j < 10; j++) {
         const { data: post } = await axios.get(
-          `https://jsonplaceholder.typicode.com/posts/${j}`,
+          `https://jsonplaceholder.typicode.com/posts/3`,//${j}
         );
 
         // Create a new Post associated with the Autobot
         const newPost = await this.postService.create({
-          title: `${post.title}-${i}-${j}`,
+          title: `${post.title}-${Date.now().toLocaleString()}`,
           body: post.body,
           authorId: autobot.id,
         });
@@ -76,25 +78,23 @@ export class AutobotService {
         // Create 10 comments for each post
         for (let k = 0; k < 10; k++) {
           const { data: comment } = await axios.get(
-            `https://jsonplaceholder.typicode.com/comments/${k}`,
+            `https://jsonplaceholder.typicode.com/comments/1`, //${k}
           );
 
           // Create a new Comment associated with the Post
           await this.commentService.create({
-            title: comment.name,
             comment: comment.body,
             postId: newPost.id,
-            authorId: comment.name,
-            parentId: '',
+            authorId: autobot.id,
           });
         }
+        autobots.push(autobot);
+      // Emit the new count to all connected clients
+       await this.autobotGateway.updateAutobotCount(autobots.length);
       }
 
-      const newCount = await this.autobotRepository.count({});
-
-      // Emit the new count to all connected clients
-      autobotsCount = await this.autobotGateway.updateAutobotCount(newCount);
     }
+    const autobotsCount = await this.autobotRepository.count({});
     return autobotsCount;
   }
 

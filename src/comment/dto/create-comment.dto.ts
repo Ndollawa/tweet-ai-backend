@@ -3,10 +3,6 @@ import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
 export class CreateCommentDto {
   @IsString()
   @IsNotEmpty()
-  title: string;
-
-  @IsString()
-  @IsNotEmpty()
   comment: string;
 
   @IsString()
@@ -17,7 +13,7 @@ export class CreateCommentDto {
   @IsNotEmpty()
   authorId: string;
 
-  @IsString()
   @IsOptional()
-  parentId: string;
+  @IsString()
+  parentId?: string;
 }

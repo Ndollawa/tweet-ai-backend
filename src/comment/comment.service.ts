@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Comment, CommentStatus } from '@prisma/client';
 import { handleError } from '@app/common';
 import { CreateCommentDto } from './dto/create-comment.dto';
@@ -9,10 +9,10 @@ import { CommentRepository } from './comment.repository';
 export class CommentService {
   constructor(protected readonly commentRepository: CommentRepository) {}
 
-  async find(query: any): Promise<Comment> {
+  async find(id: string): Promise<Comment> {
     try {
       return await this.commentRepository.find({
-        where: query,
+        where: { id },
         include: { author: true },
       });
     } catch (error) {

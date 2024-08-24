@@ -23,6 +23,10 @@ export class AutobotController {
   findAll() {
     return this.autobotService.findAll({});
   }
+  @Get('/generateAutobots')
+  generateAutobots() {
+    return this.autobotService.generateAutobots();
+  }
 
   @Get(':id')
   findOne(@Param('id') id: string) {

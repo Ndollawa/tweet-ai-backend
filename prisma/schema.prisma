@@ -32,7 +32,7 @@ enum CommentStatus {
 
 model Autobot {
   id                 String          @id @default(uuid())
-  name           String          @unique
+  name               String          
   posts              Post[]
   comments           Comment[]
   createdAt          DateTime        @default(now())
@@ -45,7 +45,7 @@ model Post {
   status      PostStatus   @default(PUBLISHED)
   comments    Comment[]
   author      Autobot      @relation(fields: [authorId], references: [id])
-  authorId    String       @unique
+  authorId    String       
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt()
 }
@@ -56,13 +56,13 @@ model Comment {
   // name       String
   comment    String
   status     CommentStatus @default(PUBLISHED)
-  parent     Comment       @relation("commentToComment", fields: [parentId], references: [id])
-  parentId   String        @unique
+  parent     Comment?       @relation("commentToComment", fields: [parentId], references: [id])
+  parentId   String?       
   children   Comment[]     @relation("commentToComment")
   author     Autobot       @relation(fields: [authorId], references: [id])
-  authorId   String        @unique
+  authorId   String        
   post       Post          @relation(fields: [postId], references: [id])
-  postId     String        @unique
+  postId     String        
   createdAt  DateTime      @default(now())
   updatedAt  DateTime      @updatedAt()
 }
